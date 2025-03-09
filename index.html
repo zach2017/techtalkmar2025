@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fancy Online Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-5">
+        <div class="flex justify-between items-center bg-white p-4 shadow-md rounded-lg">
+            <h1 class="text-xl font-bold">Fancy Store</h1>
+            <div>
+                <button id="loginBtn" onclick="showLogin()" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Login</button>
+                <button id="signupBtn" onclick="showSignup()" class="bg-green-500 text-white px-4 py-2 rounded-lg">Sign Up</button>
+                <button id="logoutBtn" onclick="logout()" class="hidden bg-red-500 text-white px-4 py-2 rounded-lg">Logout</button>
+                <button onclick="viewCart()" class="bg-yellow-500 text-white px-4 py-2 rounded-lg relative">
+                    🛒 <span id="cartCount" class="absolute top-0 right-0 bg-red-500 text-white text-xs px-2 py-1 rounded-full">0</span>
+                </button>
+                <button onclick="clearCart()" class="bg-red-500 text-white px-4 py-2 rounded-lg">Clear Cart</button>
+            </div>
+        </div>
+        
+        <div id="products" class="grid grid-cols-3 gap-4 mt-5"></div>
+    </div>
+
+    <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white p-5 rounded-lg">
+            <h2 class="text-xl font-bold">Login</h2>
+            <input id="loginName" type="text" placeholder="Name" class="border p-2 w-full my-2">
+            <input id="loginPassword" type="password" placeholder="Password" class="border p-2 w-full my-2">
+            <button onclick="login()" class="bg-blue-500 text-white px-4 py-2 rounded-lg w-full">Login</button>
+            <button onclick="closeModal('loginModal')" class="bg-gray-500 text-white px-4 py-2 rounded-lg w-full mt-2">Close</button>
+        </div>
+    </div>
+
+    <div id="signupModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white p-5 rounded-lg">
+            <h2 class="text-xl font-bold">Sign Up</h2>
+            <input id="signupName" type="text" placeholder="Name" class="border p-2 w-full my-2">
+            <input id="signupPassword" type="password" placeholder="Password" class="border p-2 w-full my-2">
+            <input id="signupShipping" type="text" placeholder="Shipping Address" class="border p-2 w-full my-2">
+            <button onclick="signup()" class="bg-green-500 text-white px-4 py-2 rounded-lg w-full">Sign Up</button>
+            <button onclick="closeModal('signupModal')" class="bg-gray-500 text-white px-4 py-2 rounded-lg w-full mt-2">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            { 
+                id: 1, 
+                name: "Fancy Watch", 
+                price: 199, 
+                image: "https://media.businessdesk.co.nz/file/c_fill,w_700,q_100/Big_Bang_One_Click_Paraiba_1-jpg-1-1resize.webp" 
+            },
+            { 
+                id: 2, 
+                name: "Stylish Shoes", 
+                price: 99, 
+                image: "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?q=80&w=300&auto=format&fit=crop" 
+            },
+            { 
+                id: 3, 
+                name: "Luxury Bag", 
+                price: 149, 
+                image: "https://images.unsplash.com/photo-1598532163257-ae3c6b2524b6?q=80&w=300&auto=format&fit=crop" 
+            }
+        ];
+
+        function renderProducts() {
+            const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
+            const productContainer = document.getElementById("products");
+            productContainer.innerHTML = products.map(p => `
+                <div class="bg-white p-4 shadow-md rounded-lg">
+                    <img src="${p.image}" class="w-full h-48 object-cover rounded" alt="${p.name}">
+                    <h2 class="text-lg font-bold mt-2">${p.name}</h2>
+                    <p class="text-gray-500">$${p.price}</p>
+                    <button onclick="addToCart(${p.id})" class="bg-blue-500 text-white px-4 py-2 rounded-lg mt-2 w-full">Buy</button>
+                </div>
+            `).join("");
+            updateLoginUI();
+        }
+        
+        function showLogin() { document.getElementById("loginModal").classList.remove("hidden"); }
+        function showSignup() { document.getElementById("signupModal").classList.remove("hidden"); }
+        function closeModal(id) { document.getElementById(id).classList.add("hidden"); }
+
+        function login() {
+            const name = document.getElementById("loginName").value;
+            const password = document.getElementById("loginPassword").value;
+            if (name && password) {
+                const user = { name, shipping: "N/A" };
+                sessionStorage.setItem("isLoggedIn", "true");
+                localStorage.setItem("user", JSON.stringify(user));
+                closeModal("loginModal");
+                updateLoginUI();
+                alert("Logged in successfully!");
+            } else {
+                alert("Please fill in all fields.");
+            }
+        }
+
+        function signup() {
+            const name = document.getElementById("signupName").value;
+            const password = document.getElementById("signupPassword").value;
+            const shipping = document.getElementById("signupShipping").value;
+            if (name && password && shipping) {
+                const user = { name, shipping };
+                sessionStorage.setItem("isLoggedIn", "true");
+                localStorage.setItem("user", JSON.stringify(user));
+                closeModal("signupModal");
+                updateLoginUI();
+                alert("Signed up and logged in successfully!");
+            } else {
+                alert("Please fill in all fields.");
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("user");
+            localStorage.removeItem("cart");
+            updateLoginUI();
+            updateCartCount();
+            alert("Logged out successfully!");
+        }
+
+        function updateLoginUI() {
+            const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
+            document.getElementById("loginBtn").classList.toggle("hidden", isLoggedIn);
+            document.getElementById("signupBtn").classList.toggle("hidden", isLoggedIn);
+            document.getElementById("logoutBtn").classList.toggle("hidden", !isLoggedIn);
+        }
+
+        function updateCartCount() {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            document.getElementById("cartCount").innerText = cart.length;
+        }
+
+        function clearCart() {
+            localStorage.removeItem("cart");
+            updateCartCount();
+            alert("Cart has been cleared.");
+        }
+
+        function addToCart(id) {
+            const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
+            if (!isLoggedIn) {
+                alert("Please login to purchase.");
+                showLogin();
+                return;
+            }
+            const user = JSON.parse(localStorage.getItem("user"));
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            const product = products.find(p => p.id === id);
+            cart.push({ ...product, user: user.name, shipping: user.shipping });
+            localStorage.setItem("cart", JSON.stringify(cart));
+            updateCartCount();
+            alert("Product added to cart!");
+        }
+
+        function viewCart() {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            if (cart.length === 0) {
+                alert("Cart is empty!");
+                return;
+            }
+            alert(cart.map(p => `${p.name} - $${p.price} (Buyer: ${p.user}, Shipping: ${p.shipping})`).join("\n"));
+        }
+
+        renderProducts();
+        updateCartCount();
+    </script>
+</body>
+</html>
