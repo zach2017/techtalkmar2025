@@ -1,11 +1,19 @@
 {
   "$schema": "https://encore.dev/schemas/infra.schema.json",
   "metadata": {
-    "app_id": "my-app",
-    "env_name": "production",
-    "env_type": "production",
+    "app_id": "tutorial-syp2",
+    "env_name": "dev",
+    "env_type": "development",
     "cloud": "docker",
-    "base_url": "http://localhost:8080"
+    "base_url": "http://localhost:7777"
+  },
+  "service_discovery": {
+    "foo": {
+      "base_url": "http://localhost:7777/foo"
+    },
+    "hello": {
+      "base_url": "http://localhost:7777/hello"
+    }
   },
   "sql_servers": [
     {
@@ -13,7 +21,7 @@
       "databases": {
         "hello": {
           "username": "postgres",
-          "password": "password"
+          "password": "postgres"
         }
       }
     }

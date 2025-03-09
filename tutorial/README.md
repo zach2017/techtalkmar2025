@@ -44,4 +44,12 @@ http://localhost:4000/greeting/zach
 ### Connect to DB
 ``` encore db shell hello ```
 
+### Build Docker 
+
+``` encore build docker --config infra.config.json tutorial ```
+
+### Run Docker
+
+
+
 TBD ..
