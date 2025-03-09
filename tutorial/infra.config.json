@@ -1,0 +1,21 @@
+{
+  "$schema": "https://encore.dev/schemas/infra.schema.json",
+  "metadata": {
+    "app_id": "my-app",
+    "env_name": "production",
+    "env_type": "production",
+    "cloud": "docker",
+    "base_url": "http://localhost:8080"
+  },
+  "sql_servers": [
+    {
+      "host": "localhost:5432",
+      "databases": {
+        "hello": {
+          "username": "postgres",
+          "password": "password"
+        }
+      }
+    }
+  ]
+}
