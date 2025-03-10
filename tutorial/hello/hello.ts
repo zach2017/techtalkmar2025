@@ -2,7 +2,7 @@ import { api } from "encore.dev/api";
 import log from "encore.dev/log";
 import { getAuthData } from "~encore/auth";
 import { SQLDatabase } from "encore.dev/storage/sqldb";
-
+import {fetchEvents } from "./webscrape"
 
 interface Response {
   message: string;
@@ -16,7 +16,7 @@ export const get = api(
   { method: "GET", path: "/hello", expose: false },
 
   async (): Promise<Response> => {
-   
+     await fetchEvents()
     return { message: "Hello" };
   },
 );
